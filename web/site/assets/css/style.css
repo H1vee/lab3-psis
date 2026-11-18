@@ -1,0 +1,230 @@
+:root {
+  --paper: #f1f3ee;
+  --surface: #ffffff;
+  --ink: #1c2420;
+  --ink-muted: #5a6560;
+  --rule: #cbd2ca;
+  --accent: #2f6b4f;
+  --accent-tint: #dde9e0;
+  --warn: #8a3c2b;
+  --warn-tint: #f4e2dd;
+  --gap: clamp(1.25rem, 3vw, 2.5rem);
+  --font-display: "Iowan Old Style", Charter, Georgia, "Times New Roman", serif;
+  --font-text: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.5em;
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+h2 {
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+}
+
+p {
+  max-width: 66ch;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.shell {
+  width: min(100% - 2 * var(--gap), 80ch);
+  margin-inline: auto;
+}
+
+.masthead {
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--rule);
+}
+
+.masthead__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1.5rem;
+  padding-block: 1rem;
+}
+
+.masthead__title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.masthead__path {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  margin-inline-start: auto;
+}
+
+.hero {
+  padding-block: clamp(2rem, 6vw, 3.5rem) clamp(1.5rem, 4vw, 2.5rem);
+  border-bottom: 1px solid var(--rule);
+}
+
+.hero__lead {
+  font-size: 1.15rem;
+  color: var(--ink-muted);
+  margin-bottom: 1.25rem;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--rule);
+  border-radius: 2rem;
+  background-color: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.status__dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background-color: var(--ink-muted);
+}
+
+.status[data-state="ok"] {
+  border-color: var(--accent);
+  background-color: var(--accent-tint);
+  color: var(--accent);
+}
+
+.status[data-state="ok"] .status__dot {
+  background-color: var(--accent);
+}
+
+.status[data-state="down"] {
+  border-color: var(--warn);
+  background-color: var(--warn-tint);
+  color: var(--warn);
+}
+
+.status[data-state="down"] .status__dot {
+  background-color: var(--warn);
+}
+
+.section {
+  padding-block: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  list-style: none;
+}
+
+.filters button {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--rule);
+  border-radius: 2rem;
+  background-color: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.filters button:hover {
+  border-color: var(--accent);
+}
+
+.filters button[aria-pressed="true"] {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--surface);
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--surface);
+  font-size: 0.95rem;
+}
+
+caption {
+  text-align: start;
+  color: var(--ink-muted);
+  padding-bottom: 0.5rem;
+}
+
+th,
+td {
+  text-align: start;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+th {
+  font-family: var(--font-display);
+  white-space: nowrap;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.note {
+  padding: 0.75rem 1rem;
+  border-inline-start: 3px solid var(--accent);
+  background-color: var(--surface);
+  color: var(--ink-muted);
+}
+
+.note[data-kind="error"] {
+  border-inline-start-color: var(--warn);
+  color: var(--warn);
+}
+
+.colophon {
+  padding-block: 2rem 3rem;
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+  border-top: 1px solid var(--rule);
+}
+
+@media (max-width: 40rem) {
+  .masthead__path {
+    margin-inline-start: 0;
+    width: 100%;
+  }
+}

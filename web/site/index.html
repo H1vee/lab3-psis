@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Каталог чаю</title>
+  <meta name="description" content="Параметри заварювання чаю з бази даних PostgreSQL через JSON API.">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <header class="masthead">
+    <div class="shell masthead__inner">
+      <span class="masthead__title">Каталог чаю</span>
+      <span class="masthead__path">web &rarr; api &rarr; db</span>
+    </div>
+  </header>
+
+  <main class="shell">
+    <div class="hero">
+      <h1>Параметри заварювання з бази даних</h1>
+      <p class="hero__lead">
+        Сторінку віддає nginx, дані надходять із PostgreSQL через JSON API.
+        Усі три сервіси описані в одному файлі docker-compose.yml.
+      </p>
+      <span class="status" id="status" data-state="unknown">
+        <span class="status__dot"></span>
+        <span id="status-text">перевірка стану сервісу</span>
+      </span>
+    </div>
+
+    <section class="section">
+      <h2>Фільтр за типом</h2>
+      <ul class="filters" id="filters">
+        <li><button type="button" data-tea="" aria-pressed="true">Усі</button></li>
+        <li><button type="button" data-tea="white" aria-pressed="false">Білий</button></li>
+        <li><button type="button" data-tea="green" aria-pressed="false">Зелений</button></li>
+        <li><button type="button" data-tea="oolong" aria-pressed="false">Улун</button></li>
+        <li><button type="button" data-tea="black" aria-pressed="false">Чорний</button></li>
+        <li><button type="button" data-tea="puer" aria-pressed="false">Пуер</button></li>
+      </ul>
+
+      <div id="message" class="note" hidden></div>
+
+      <div class="table-scroll">
+        <table>
+          <caption id="caption">Запит: <code>GET /api/brewing</code></caption>
+          <thead>
+            <tr>
+              <th scope="col">Тип</th>
+              <th scope="col">Окислення</th>
+              <th scope="col">Вода</th>
+              <th scope="col">Час</th>
+              <th scope="col">Промивання</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shell colophon">
+    <p>Лабораторна робота №3 з дисципліни «Проєктування та супровід інформаційних систем». Виконав Лединський А.О., група 141м, ЧНУ ім. Ю. Федьковича.</p>
+  </footer>
+
+  <script>
+    const rowsBody = document.getElementById('rows');
+    const message = document.getElementById('message');
+    const caption = document.getElementById('caption');
+    const statusBox = document.getElementById('status');
+    const statusText = document.getElementById('status-text');
+
+    function showMessage(text, kind) {
+      message.textContent = text;
+      message.dataset.kind = kind || 'info';
+      message.hidden = false;
+    }
+
+    function hideMessage() {
+      message.hidden = true;
+    }
+
+    function formatSeconds(min, max) {
+      if (max >= 60) {
+        return Math.round(min / 60) + '-' + Math.round(max / 60) + ' хв';
+      }
+      return min + '-' + max + ' с';
+    }
+
+    function render(items) {
+      rowsBody.replaceChildren();
+
+      for (const item of items) {
+        const row = document.createElement('tr');
+        const cells = [
+          item.title,
+          item.oxidation,
+          item.water_min_c + '-' + item.water_max_c + ' °C',
+          formatSeconds(item.seconds_min, item.seconds_max),
+          item.needs_rinse ? 'так' : 'ні'
+        ];
+
+        for (const value of cells) {
+          const cell = document.createElement('td');
+          cell.textContent = value;
+          row.append(cell);
+        }
+        rowsBody.append(row);
+      }
+    }
+
+    async function loadBrewing(tea) {
+      const query = tea ? '/api/brewing?tea=' + encodeURIComponent(tea) : '/api/brewing';
+      caption.textContent = 'Запит: GET ' + query;
+
+      try {
+        const response = await fetch(query, { headers: { Accept: 'application/json' } });
+        if (!response.ok) {
+          rowsBody.replaceChildren();
+          showMessage('Сервіс повернув код ' + response.status, 'error');
+          return;
+        }
+
+        const data = await response.json();
+        hideMessage();
+        render(data);
+      } catch (error) {
+        rowsBody.replaceChildren();
+        showMessage('Не вдалося звернутися до API: ' + error.message, 'error');
+      }
+    }
+
+    async function loadStatus() {
+      try {
+        const response = await fetch('/healthz', { headers: { Accept: 'application/json' } });
+        const data = await response.json();
+
+        if (response.ok && data.status === 'ok') {
+          statusBox.dataset.state = 'ok';
+          statusText.textContent = 'API працює, версія ' + data.version;
+          return;
+        }
+        statusBox.dataset.state = 'down';
+        statusText.textContent = 'API відповідає, але база недоступна';
+      } catch (error) {
+        statusBox.dataset.state = 'down';
+        statusText.textContent = 'API недоступний';
+      }
+    }
+
+    document.getElementById('filters').addEventListener('click', (event) => {
+      const button = event.target.closest('button');
+      if (!button) {
+        return;
+      }
+
+      for (const item of document.querySelectorAll('#filters button')) {
+        item.setAttribute('aria-pressed', String(item === button));
+      }
+      loadBrewing(button.dataset.tea);
+    });
+
+    loadStatus();
+    loadBrewing('');
+  </script>
+</body>
+</html>
